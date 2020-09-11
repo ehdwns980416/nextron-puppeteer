@@ -9,7 +9,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import Typography from '@material-ui/core/Typography';
 import Link from '../components/Link';
-import getPic from "../services/puppeteer";
+import scrapMKNews from "../services/puppeteer";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -25,13 +25,13 @@ const Home = () => {
   const [open, setOpen] = React.useState(false);
   const handleClose = () => setOpen(false);
   const handleClick = () => {
-    getPic('https://google.com')
+    scrapMKNews()
   };
 
   return (
     <React.Fragment>
       <Head>
-        <title>Home - Nextron (with-typescript-material-ui)</title>
+        <title>News Scrapper</title>
       </Head>
       <div className={classes.root}>
         <Dialog open={open} onClose={handleClose}>

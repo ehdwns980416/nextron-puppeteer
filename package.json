@@ -11,8 +11,10 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
     "electron-serve": "^1.0.0",
     "electron-store": "^6.0.0",
+    "jquery": "^3.5.1",
     "puppeteer": "^5.2.1"
   },
   "devDependencies": {
