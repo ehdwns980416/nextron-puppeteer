@@ -4,16 +4,7 @@ import * as $ from 'jquery';
 
 let newsList = [];
 
-/**
- * getPic(url)
- *
- * function
- *
- * Goes to the provided url paramter and takes a screenshot of that page.
- *
- * @param {String} url - A URL to provide of a website to screenshot.
- */
-export default async function scrapMKNews() {
+export default async function scrapNews(mode: 'mk' | 'hk') {
     // 브라우저 옵션 설정
     const browserOption = {
         slowMo: 500, // 디버깅용으로 퍼핏티어 작업을 지정된 시간(ms)만큼 늦춥니다.
@@ -29,8 +20,10 @@ export default async function scrapMKNews() {
     while(true) {
         let response;
         try {
-            // 리다이렉트 되는 페이지의 주소를 사용.
-            const url = 'https://www.mk.co.kr/news/all/?page='+pageNo+'&thisDate='+thisDate;
+            let url = '';
+            if(mode == 'mk') url = 'https://www.mk.co.kr/news/all/?page='+pageNo+'&thisDate='+thisDate;
+            // TODO: 한경) date부분 2020.09.10 이런식으로 .이 들어가도록 가공 필요
+            else if(mode == 'hk') url = 'https://www.hankyung.com/all-news/?sdate='+thisDate+'&edate='+thisDate+'&page='+(pageNo+1);
 
             // 탭 옵션
             const pageOption = {
@@ -57,12 +50,18 @@ export default async function scrapMKNews() {
             console.error(error);
             return;
         }
-        // cheerio 라이브러리를 사용하여 html을 DOM 으로 파싱합니다.
+
+        // cheerio 라이브러리를 사용하여 html을 DOM 으로 파싱
         const $$ = cheerio.load(html);
+
         // 기사 리스트 받아오기
-        const articleList = $$('dl.article_list');
+        let articleList = null;
+        if(mode == 'mk') articleList = $$('dl.article_list');
+            // TODO: 한경) 리스트 태그 확인
+        else if(mode == 'hk') articleList = $$('tag');
+
         if(articleList.length > 0) {
-            let result = extractNewsList(articleList);
+            let result = mode == 'mk' ? extractMKNewsList(articleList) : extractHKNewsList(articleList);
             if(result.length > 0) newsList = newsList.concat(result);
             pageNo += 1;
             //Todo: 테스트 중이라 몇 페이지만 가저오게 설정함
@@ -77,10 +76,10 @@ export default async function scrapMKNews() {
 
     newsList = duplicateCheck(newsList);
 
-    setNewsDataToList(newsList);
+    return newsList;
 }
 
-function extractNewsList(articleList) {
+function extractMKNewsList(articleList) {
     newsList = [];
 
     for (let i = 0; i < articleList.length; i += 1) {
@@ -125,6 +124,10 @@ function extractNewsList(articleList) {
     return newsList;
 }
 
+function extractHKNewsList(articleList) {
+    console.log(articleList);
+    return articleList;
+}
 
 function duplicateCheck(newsList) {
     // 링크 별로 sorting
@@ -148,29 +151,4 @@ function duplicateCheck(newsList) {
     }
 
     return newsList;
-}
-
-function setNewsDataToList(newsList) {
-    console.log(newsList);
-    // $.each(newsList, function (i, news) {
-    //     let template = `
-    //     <li class="list-group-item flex-column align-items-start news-item">
-    //     <div class="image-box">
-    //       <img src="${(news.image || "https://via.placeholder.com/100X50")}">
-    //     </div>
-    //     <div class="content-box">
-    //       <div class="d-flex w-100 justify-content-between">
-    //         <h5 class="mb-1">${news.title}</h5>
-    //       </div>
-    //       <small>${news.date}</small>
-    //     </div>
-    //     <div class="tool-box">
-    //       <button class="remove-btn text-danger" data-url="${news.link}">
-    //         <i class="fa fa-minus-circle"></i>
-    //       </button>
-    //     </div>
-    //   </li>
-    //     `;
-    //     $("ul.news-list").append(template);
-    // });
 }
