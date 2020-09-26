@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Head from 'next/head';
 import {Theme, makeStyles} from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -6,9 +6,9 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import scrapNews from "../services/puppeteer";
 
 import ScrapPage from './scrapPage';
+import NewsListPage from "./newsListPage";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -51,16 +51,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const Home = () => {
-    const [open, setOpen] = React.useState(false);
-    const [newsList, setNewsList] = React.useState([]);
-    const handleClose = () => setOpen(false);
-    const handleClick = () => {
-        let result: any = scrapNews("mk");
-        if (result && result.length > 0) setNewsList(result);
-    };
-
     const classes = useStyles({});
     const [value, setValue] = React.useState(0);
+    const [newsList, setNewsList] = React.useState([]);
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
@@ -74,15 +67,15 @@ const Home = () => {
                 <AppBar position="static">
                     <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
                         <Tab label="스크랩" {...a11yProps(0)} />
-                        <Tab label="Item Two" {...a11yProps(1)} />
+                        <Tab label="뉴스목록" {...a11yProps(1)} />
                         <Tab label="Item Three" {...a11yProps(2)} />
                     </Tabs>
                 </AppBar>
                 <TabPanel value={value} index={0}>
-                    <ScrapPage/>
+                    <ScrapPage setNewsList={scrapList => setNewsList(scrapList)} setTabIndex={setValue.bind(this)}/>
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    Item Two
+                    <NewsListPage scrapList={newsList}/>
                 </TabPanel>
                 <TabPanel value={value} index={2}>
                     Item Three
